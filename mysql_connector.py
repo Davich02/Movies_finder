@@ -20,32 +20,38 @@ config = {
 def get_connection():
     return pymysql.connect(**config)
 
-# Fetches all genre names and IDs from the category table / извлекаем все названия категорий
-def get_all_genres():
+# Helper function to execute SQL queries and return results / вспомогательная функция для выполнения SQL запросов чтобы не повторять код
+def execute_query(sql, params=(), fetchone=False):
     with get_connection() as conn:
         with conn.cursor() as cursor:
-            cursor.execute('SELECT category_id, name FROM category')
-            return cursor.fetchall()
+            cursor.execute(sql, params)
+            if fetchone:
+                return cursor.fetchone()
+            else:
+                return cursor.fetchall()
+
+
+# Fetches all genre names and IDs from the category table / извлекаем все названия категорий
+def get_all_genres():
+    return execute_query('SELECT category_id, name FROM category')
+
 
 # Fetches the minimum and maximum release years from the film table / извлекаем минимальный и максимальный года
 def get_year_range():
-    with get_connection() as conn:
-        with conn.cursor() as cursor:
-            cursor.execute('SELECT MIN(release_year), MAX(release_year) FROM film')
-            return cursor.fetchone()
+    return execute_query(
+        'SELECT MIN(release_year), MAX(release_year) FROM film', fetchone=True)
 
 
 #Searching movies by user_input keyword and show 10 options/ поиск фильма по слову от пользователя и выводим 10 позиций
 def search_by_keyword(keyword,offset):
     pattern = f"%{keyword}%"
-    with get_connection() as conn:
-        with conn.cursor() as cursor:
-            cursor.execute('SELECT film_id, title, release_year, rating, length FROM film WHERE title LIKE %s LIMIT 10 OFFSET %s', (pattern,offset,))
-            return cursor.fetchall()
+    return execute_query(
+        'SELECT film_id, title, release_year, rating, length FROM film WHERE title LIKE %s LIMIT 10 OFFSET %s',
+        (pattern,offset,))
+
 
 #Searching movies by user_input genre and years limits / поиск фильма по жанру и годам от пользователя
 def search_by_genre_and_years(genre_id, year_from, year_to, offset):
-    with get_connection() as conn:
-        with conn.cursor() as cursor:
-            cursor.execute('Select f.film_id, f.title,f.release_year,f.rating,f.length from film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id = %s AND f.release_year BETWEEN %s AND %s LIMIT 10 OFFSET %s ', (genre_id,year_from, year_to,offset,))
-            return cursor.fetchall()
+        return execute_query(
+            'Select f.film_id, f.title,f.release_year,f.rating,f.length from film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id = %s AND f.release_year BETWEEN %s AND %s LIMIT 10 OFFSET %s ',
+            (genre_id,year_from, year_to,offset,))
