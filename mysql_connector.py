@@ -33,3 +33,19 @@ def get_year_range():
         with conn.cursor() as cursor:
             cursor.execute('SELECT MIN(release_year), MAX(release_year) FROM film')
             return cursor.fetchone()
+
+
+#Searching movies by user_input keyword and show 10 options/ поиск фильма по слову от пользователя и выводим 10 позиций
+def search_by_keyword(keyword,offset):
+    pattern = f"%{keyword}%"
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute('SELECT film_id, title, release_year, rating, length FROM film WHERE title LIKE %s LIMIT 10 OFFSET %s', (pattern,offset,))
+            return cursor.fetchall()
+
+#Searching movies by user_input genre and years limits / поиск фильма по жанру и годам от пользователя
+def search_by_genre_and_years(genre_id, year_from, year_to, offset):
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute('Select f.film_id, f.title,f.release_year,f.rating,f.length from film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id = %s AND f.release_year BETWEEN %s AND %s LIMIT 10 OFFSET %s ', (genre_id,year_from, year_to,offset,))
+            return cursor.fetchall()
