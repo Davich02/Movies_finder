@@ -12,7 +12,7 @@ from datetime import datetime
 load_dotenv()
 
 # Connection to db with db datas
-client = MongoClient(os.getenv("MONGO_URI"))
+client = MongoClient(os.getenv("MONGO_URL"))
 db = client["ich_edit"]
 collection = db["final_project_101025_david_narkevych"]
 

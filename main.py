@@ -27,23 +27,26 @@ def main():
             print("Введите число!")
             continue
         if button == 1:
-            keyword = input("Введите слово для поиска: ")
-            if not keyword.strip():
-                print("Введите слово для поиска!")
-            else:
+            while True:
+                keyword = input("Введите слово для поиска (0 - выход): ")
+                if keyword == "0":
+                    break
+                if not keyword.strip():
+                    print("Введите слово!")
+                    continue
                 results = search_by_keyword(keyword, 0)
+                log_search("keyword", {"keyword": keyword}, len(results))
                 if not results:
-                    print("Ничего не найдено 😔")
+                    print("Ничего не найдено 😔 Попробуйте другое слово")
                 else:
                     print_films(results)
+                    break
         elif button == 2:
             genres = get_all_genres()
             years = get_year_range()
-            # сначала выводим ВСЕ жанры
             for genre in genres:
                 print(f"{genre[0]} - {genre[1]:<15} | {years[0]} - {years[1]}")
 
-                    # потом спрашиваем
             print("\n0 - Вернуться в главное меню")
             genre_name = input("Введите название жанра: ")
 
@@ -66,12 +69,11 @@ def main():
                     print("Введите корректный год!")
                 else:
                     results = search_by_genre_and_years(genre_id, year_from, year_to, 0)
+                    log_search("genre", {"genre": genre_name, "year_from": year_from, "year_to": year_to}, len(results))
                     if not results:
                         print("Ничего не найдено 😔")
                     else:
                         print_films(results)
-        elif button == 3:
-            get_recent_searches()
         elif button == 4:
             print("До встречи !")
             break

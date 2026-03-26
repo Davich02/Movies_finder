@@ -1,5 +1,6 @@
+#Module with tables to make beuaty output
 from tabulate import tabulate
-
+# Printing with table
 def print_films(films):
     headers = ["ID", "Название", "Год", "Рейтинг", "Продолжительность"]
     films_with_min = [
