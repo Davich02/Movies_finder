@@ -34,6 +34,7 @@ def execute_query(sql, params=(), fetchone=False):
 # Fetches all genre names and IDs from the category table / извлекаем все названия категорий
 def get_all_genres():
     return execute_query('SELECT category_id, name FROM category')
+print(get_all_genres())
 
 
 # Fetches the minimum and maximum release years from the film table / извлекаем минимальный и максимальный года
