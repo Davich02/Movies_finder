@@ -6,10 +6,11 @@ from log_writer import collection
 def get_top_searches():
     result = collection.aggregate([{
         "$group": {
-            "_id": "$search_type",
+            "_id": "$query_label",
             "count": {"$sum": 1},
+            "search_type": {"$first": "$search_type"},
         }},
-        {"%sort": {"count": 1}},
+        {"$sort": {"count": -1},},
         {"$limit":5}
     ])
     return list(result)

@@ -43,16 +43,26 @@ def get_year_range():
         'SELECT MIN(release_year), MAX(release_year) FROM film', fetchone=True)
 
 
+# Fetches min and max release year per genre / минимальный и максимальный год для каждого жанра
+def get_genre_year_ranges():
+    rows = execute_query(
+        'SELECT fc.category_id, MIN(f.release_year), MAX(f.release_year) '
+        'FROM film f JOIN film_category fc ON f.film_id = fc.film_id '
+        'GROUP BY fc.category_id'
+    )
+    return {row[0]: (row[1], row[2]) for row in rows}
+
+
 #Searching movies by user_input keyword and show 10 options/ поиск фильма по слову от пользователя и выводим 10 позиций
 def search_by_keyword(keyword,offset):
     pattern = f"%{keyword}%"
     return execute_query(
-        'SELECT film_id, title, release_year, rating, length FROM film WHERE title LIKE %s LIMIT 10 OFFSET %s',
+        'SELECT film_id, title, release_year, rating, length FROM film WHERE title LIKE %s LIMIT 11 OFFSET %s',
         (pattern,offset,))
 
 
 #Searching movies by user_input genre and years limits / поиск фильма по жанру и годам от пользователя
 def search_by_genre_and_years(genre_id, year_from, year_to, offset):
         return execute_query(
-            'Select f.film_id, f.title,f.release_year,f.rating,f.length from film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id = %s AND f.release_year BETWEEN %s AND %s LIMIT 10 OFFSET %s ',
+            'Select f.film_id, f.title,f.release_year,f.rating,f.length from film f JOIN film_category fc ON f.film_id = fc.film_id WHERE fc.category_id = %s AND f.release_year BETWEEN %s AND %s LIMIT 11 OFFSET %s ',
             (genre_id,year_from, year_to,offset,))

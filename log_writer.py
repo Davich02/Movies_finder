@@ -17,13 +17,14 @@ db = client["ich_edit"]
 collection = db["final_project_101025_david_narkevych"]
 
 
-def log_search(search_type,params,results_count):
+def log_search(search_type, params, results_count, query_label):
     doc = {
         # Getting time and switching it to str
         "timestamp": datetime.now().isoformat(),
         "search_type": search_type,
         "params": params,
         "results_count": results_count,
+        "query_label": query_label,
     }
     collection.insert_one(doc)
 
