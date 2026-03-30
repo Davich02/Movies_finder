@@ -60,11 +60,23 @@ Final_project/
 
 **1. Clone the repository and navigate to the project folder**
 
+```bash
+git clone <repository-url>
+cd Final_project
+```
+
 **2. Create and activate a virtual environment**
 
+Mac / Linux:
 ```bash
 python3 -m venv venv
 source venv/bin/activate
+```
+
+Windows:
+```bash
+python -m venv venv
+venv\Scripts\activate
 ```
 
 **3. Install dependencies**

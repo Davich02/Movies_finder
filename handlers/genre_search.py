@@ -18,16 +18,27 @@ def handle_genre_search():
         print(f"  {genre[0]:>2}. {genre[1]:<15} | {yr[0]} - {yr[1]}")
     print("\n0 - Back to main menu")
 
-    genre_name = input("Enter genre name: ")
-    if genre_name == "0":
+    # user can pick genre by number or name / можно выбрать жанр по номеру или названию
+    user_input = input("Enter genre number or name: ")
+    if user_input == "0":
         return
 
-    # find genre id by name, case insensitive / ищем id жанра по названию без учёта регистра
     genre_id = None
-    for genre in genres:
-        if genre[1].lower() == genre_name.lower():
-            genre_id = genre[0]
-            break
+    genre_name = None
+    # check if user entered a number / проверяем ввёл ли пользователь номер
+    if user_input.isdigit():
+        num = int(user_input)
+        for genre in genres:
+            if genre[0] == num:
+                genre_id = num
+                genre_name = genre[1]
+                break
+    else:
+        for genre in genres:
+            if genre[1].lower() == user_input.lower():
+                genre_id = genre[0]
+                genre_name = genre[1]
+                break
     if genre_id is None:
         print("Genre not found")
         return
@@ -37,7 +48,9 @@ def handle_genre_search():
     year_from, year_to = None, None
     for attempt in range(3):
         try:
-            year_range = input(f"Year or range (e.g. {min_year}-{max_year}): ")
+            year_range = input(f"Year or range (e.g. {min_year}-{max_year}, 0 - back): ")
+            if year_range == "0":
+                return
             if "-" in year_range:
                 year_from, year_to = year_range.split("-")
             else:
