@@ -1,8 +1,11 @@
+# main file - runs the app and shows menu / главный файл - запуск приложения и меню
+
 from handlers.keyword_search import handle_keyword_search
 from handlers.genre_search import handle_genre_search
 from handlers.stats import handle_top_searches, handle_recent_searches
 
 
+# prints menu options / выводит меню
 def show_menu():
     print("""
 =============================
@@ -17,6 +20,7 @@ def show_menu():
     """)
 
 
+# main loop - keeps showing menu until user picks exit / цикл меню пока не выберет выход
 def main():
     while True:
         show_menu()

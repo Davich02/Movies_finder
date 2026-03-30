@@ -1,20 +1,28 @@
-from db.mysql_connector import get_all_genres, search_by_genre_and_years, get_genre_year_ranges, count_by_genre_and_years
+# handles search by genre and year range / обработка поиска по жанру и годам
+
+from db.mysql_connector import get_all_genres, search_by_genre_and_years, get_genre_year_ranges, count_by_genre_and_years, get_year_range
 from utils.formatter import print_films
 from logger.log_writer import log_search
 
 
-# Search films by genre and year range with pagination
+# shows all genres with year ranges, asks user to pick one, then shows results 10 at a time
+# показывает жанры с диапазоном лет, пользователь выбирает, потом результаты по 10
 def handle_genre_search():
     genres = get_all_genres()
     genre_years = get_genre_year_ranges()
+
+    # show all genres with their year range / выводим жанры с их диапазоном лет
     print("\nAvailable genres:")
     for genre in genres:
         yr = genre_years.get(genre[0], ("?", "?"))
         print(f"  {genre[0]:>2}. {genre[1]:<15} | {yr[0]} - {yr[1]}")
     print("\n0 - Back to main menu")
+
     genre_name = input("Enter genre name: ")
     if genre_name == "0":
         return
+
+    # find genre id by name, case insensitive / ищем id жанра по названию без учёта регистра
     genre_id = None
     for genre in genres:
         if genre[1].lower() == genre_name.lower():
@@ -23,23 +31,37 @@ def handle_genre_search():
     if genre_id is None:
         print("Genre not found")
         return
-    min_year, max_year = genre_years.get(genre_id, (1900, 2100))
-    try:
-        year_range = input("Year or range (e.g. 2000-2010): ")
-        if "-" in year_range:
-            year_from, year_to = year_range.split("-")
-        else:
-            year_from = year_to = year_range
-        year_from, year_to = int(year_from), int(year_to)
-    except ValueError:
-        print("Please enter a valid year!")
+
+    # user can enter one year (2006) or range (2000-2010), 3 attempts / можно ввести год или диапазон, 3 попытки
+    min_year, max_year = genre_years.get(genre_id, get_year_range())
+    year_from, year_to = None, None
+    for attempt in range(3):
+        try:
+            year_range = input(f"Year or range (e.g. {min_year}-{max_year}): ")
+            if "-" in year_range:
+                year_from, year_to = year_range.split("-")
+            else:
+                year_from = year_to = year_range
+            year_from, year_to = int(year_from), int(year_to)
+        except ValueError:
+            print(f"Please enter a valid year! Attempts left: {2 - attempt}")
+            year_from, year_to = None, None
+            continue
+        # check that years make sense / проверяем что года в допустимом диапазоне
+        if year_from < min_year or year_to > max_year or year_from > year_to:
+            print(f"Invalid range! Available years: {min_year} - {max_year}. Attempts left: {2 - attempt}")
+            year_from, year_to = None, None
+            continue
+        break
+    if year_from is None:
+        print("Too many wrong attempts, back to menu")
         return
-    if year_from < min_year or year_to > max_year or year_from > year_to:
-        print(f"Invalid range! Available years: {min_year} - {max_year}")
-        return
+
     query_label = f"{genre_name} {year_from}-{year_to}"
     total = count_by_genre_and_years(genre_id, year_from, year_to)
     print(f"\nFound {total} films for \"{genre_name}\" ({year_from}-{year_to})")
+
+    # pagination - same as keyword search / пагинация - так же как в поиске по слову
     offset = 0
     while True:
         results = search_by_genre_and_years(genre_id, year_from, year_to, offset)
@@ -57,4 +79,3 @@ def handle_genre_search():
             offset += 10
         else:
             break
-    input("\nEnter -> Main menu")
