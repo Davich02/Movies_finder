@@ -1,76 +1,83 @@
 # Final_Python_Project
 
-Консольное приложение на Python для поиска фильмов с использованием гибридной архитектуры баз данных (MySQL + MongoDB).
+Console application in Python for searching movies using a hybrid database architecture (MySQL + MongoDB).
 
 ---
 
-## Описание проекта
+## Project description
 
-Приложение предоставляет интерфейс командной строки для поиска фильмов в базе данных **sakila**.
-Оно демонстрирует практическое использование как реляционных (MySQL), так и нереляционных (MongoDB) баз данных в одном приложении.
-
----
-
-## Функциональные возможности
-
-- Поиск по ключевым словам — нахождение фильмов по части названия
-- Поиск по жанру и году — фильтрация фильмов по жанрам и диапазону лет выпуска
-- Пагинация — вывод результатов по 10 штук с возможностью подгрузки следующих
-- Аналитика поиска — просмотр популярных запросов и истории поиска
-- Комплексное логирование — запись всех поисковых запросов в MongoDB
+The application provides a command-line interface for searching movies in the **sakila** database.
+It demonstrates practical use of both relational (MySQL) and non-relational (MongoDB) databases in a single application.
 
 ---
 
-## Технологический стек
+## Features
 
-- Python 3.x — основной язык
-- MySQL — реляционная БД (данные о фильмах)
-- MongoDB — документная БД (логи запросов)
-- PyMySQL — коннектор для MySQL
-- PyMongo — драйвер для MongoDB
-- python-dotenv — управление переменными окружения
-- tabulate — форматирование табличного вывода
+- Keyword search — find movies by part of the title
+- Genre and year search — filter movies by genre and release year range
+- Pagination — display results 10 at a time with the option to load more
+- Search analytics — view popular queries and search history
+- Search logging — all search queries are saved to MongoDB
 
 ---
 
-## Структура проекта
+## Tech stack
+
+- Python 3.x — main language
+- MySQL — relational DB (movie data)
+- MongoDB — document DB (search logs)
+- PyMySQL — MySQL connector
+- PyMongo — MongoDB driver
+- python-dotenv — environment variable management
+- tabulate — table output formatting
+
+---
+
+## Project structure
 
 ```
 Final_project/
-├── main.py               # Главное меню и логика навигации
-├── mysql_connector.py     # Работа с MySQL и запросы
-├── log_writer.py          # Логирование запросов в MongoDB
-├── log_stats.py           # Аналитика и статистика
-├── formatter.py           # Форматирование вывода в консоль
-├── requirements.txt       # Зависимости проекта
-├── .env                   # Переменные окружения (доступы к БД)
-└── .env_example           # Шаблон переменных окружения
+├── main.py                    # Main menu and navigation logic
+├── handlers/
+│   ├── keyword_search.py      # Keyword search handler
+│   ├── genre_search.py        # Genre and year search handler
+│   └── stats.py               # Search analytics handlers
+├── db/
+│   └── mysql_connector.py     # MySQL connection and queries
+├── logger/
+│   ├── log_writer.py          # Search logging to MongoDB
+│   └── log_stats.py           # Analytics and statistics
+├── utils/
+│   └── formatter.py           # Console output formatting
+├── requirements.txt           # Project dependencies
+├── .env                       # Environment variables (DB credentials)
+└── .env_example               # Environment variables template
 ```
 
 ---
 
-## Установка и запуск
+## Installation and launch
 
-**1. Клонировать репозиторий и перейти в папку проекта**
+**1. Clone the repository and navigate to the project folder**
 
-**2. Создать и активировать виртуальное окружение**
+**2. Create and activate a virtual environment**
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
 
-**3. Установить зависимости**
+**3. Install dependencies**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-**4. Настроить переменные окружения**
+**4. Set up environment variables**
 
-Скопировать `.env_example` в `.env` и заполнить данные для подключения к базам данных.
+Copy `.env_example` to `.env` and fill in your database credentials.
 
-**5. Запустить приложение**
+**5. Run the application**
 
 ```bash
 python main.py

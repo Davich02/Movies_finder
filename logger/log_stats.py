@@ -1,6 +1,4 @@
-import pymongo
-
-from log_writer import collection
+from logger.log_writer import collection
 
 
 def get_top_searches():
