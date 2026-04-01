@@ -1,27 +1,49 @@
-# reads search stats from mongodb / читает статистику запросов из mongodb
+"""Analytics module. Reads search history from MongoDB for statistics.
+Модуль аналитики. Читает историю поиска из MongoDB для статистики.
+"""
 
 from logger.log_writer import collection
 
 
-# gets top 5 most popular searches using aggregate
-# берёт топ 5 популярных запросов через агрегацию
-# $group - groups by query_label and counts how many times each was searched
-# $sort - most popular first
-# $limit - only top 5
 def get_top_searches():
+    """Return top 5 most frequent search queries using MongoDB aggregation pipeline.
+    Возвращает топ 5 популярных запросов через агрегацию MongoDB.
+
+    Pipeline:
+        $group  - groups documents by query_label, counts occurrences
+        $sort   - sorts by count descending (most popular first)
+        $limit  - takes only top 5
+    """
     result = collection.aggregate([{
         "$group": {
             "_id": "$query_label",
             "count": {"$sum": 1},
             "search_type": {"$first": "$search_type"},
         }},
-        {"$sort": {"count": -1},},
-        {"$limit":5}
+        {"$sort": {"count": -1}},
+        {"$limit": 5}
     ])
     return list(result)
 
 
-# gets 5 most recent searches sorted by time / последние 5 запросов по времени
 def get_recent_searches():
-    result = collection.find().sort("timestamp", -1).limit(5)
+    """Return 5 most recent unique searches grouped by query_label with count.
+    Возвращает 5 последних уникальных запросов со счётчиком.
+
+    Pipeline:
+        $group  - groups by query_label, counts occurrences, keeps last timestamp
+        $sort   - sorts by last_time descending (most recent first)
+        $limit  - takes only 5
+    """
+    result = collection.aggregate([{
+        "$group": {
+            "_id": "$query_label",
+            "count": {"$sum": 1},
+            "search_type": {"$first": "$search_type"},
+            "params": {"$first": "$params"},
+            "last_time": {"$max": "$timestamp"},
+        }},
+        {"$sort": {"last_time": -1}},
+        {"$limit": 5}
+    ])
     return list(result)

@@ -1,26 +1,41 @@
-# shows search statistics from mongodb / выводит статистику запросов из mongodb
+"""Handlers for displaying search analytics from MongoDB.
+Обработчики для вывода статистики поиска из MongoDB.
+"""
 
+from tabulate import tabulate
 from logger.log_stats import get_top_searches, get_recent_searches
 
 
-# shows top 5 most searched queries / показывает топ 5 самых частых запросов
 def handle_top_searches():
+    """Display top 5 most frequent search queries as a table.
+    Выводит топ 5 самых частых запросов таблицей.
+    """
     print("\n--- Top searches ---")
+    rows = []
     for i, item in enumerate(get_top_searches(), 1):
         search_type = item.get("search_type", "")
         icon = "keyword" if search_type == "keyword" else "genre"
-        print(f"{i}. [{icon}] {item['_id']} - {item['count']} times")
+        rows.append((i, icon, item['_id'], item['count']))
+    if rows:
+        print(tabulate(rows, headers=["#", "Type", "Query", "Count"], tablefmt="grid"))
+    else:
+        print("No searches yet")
     print()
 
 
-# shows 5 last searches with time / показывает 5 последних запросов со временем
 def handle_recent_searches():
+    """Display 5 most recent unique searches with count and time as a table.
+    Выводит 5 последних уникальных запросов со счётчиком и временем.
+    """
     print("\n--- Recent searches ---")
+    rows = []
     for i, item in enumerate(get_recent_searches(), 1):
-        params = item['params']
-        time = item['timestamp'][:16].replace('T', ' ')
-        if item['search_type'] == 'keyword':
-            print(f"{i}. [keyword] {params.get('keyword')} | {time}")
-        else:
-            print(f"{i}. [genre] {params.get('genre')} | {params.get('year_from')}-{params.get('year_to')} | {time}")
+        search_type = item.get("search_type", "")
+        icon = "keyword" if search_type == "keyword" else "genre"
+        time = item['last_time'][:16].replace('T', ' ')
+        rows.append((i, icon, item['_id'], item['count'], time))
+    if rows:
+        print(tabulate(rows, headers=["#", "Type", "Query", "Count", "Last search"], tablefmt="grid"))
+    else:
+        print("No searches yet")
     print()

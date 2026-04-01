@@ -1,12 +1,14 @@
-# main file - runs the app and shows menu / главный файл - запуск приложения и меню
+"""Entry point of the application. Displays menu and routes user input to handlers.
+Главный файл - запуск приложения и маршрутизация по меню.
+"""
 
 from handlers.keyword_search import handle_keyword_search
 from handlers.genre_search import handle_genre_search
 from handlers.stats import handle_top_searches, handle_recent_searches
 
 
-# prints menu options / выводит меню
 def show_menu():
+    """Print the main menu with available options. / Выводит главное меню."""
     print("""
 =============================
       MOVIES FINDER
@@ -20,14 +22,14 @@ def show_menu():
     """)
 
 
-# main loop - keeps showing menu until user picks exit / цикл меню пока не выберет выход
 def main():
+    """Main loop - show menu, read user choice, call the handler. / Цикл меню пока не выберет выход."""
     while True:
         show_menu()
         try:
             button = int(input("Choose an option: "))
         except ValueError:
-            print("Please enter a number!")
+            print("Please enter a number to choose the option !")
             continue
         if button == 1:
             handle_keyword_search()

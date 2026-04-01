@@ -1,31 +1,36 @@
-# handles search by genre and year range / обработка поиска по жанру и годам
+"""Handler for searching films by genre and year range. Supports pagination and input validation.
+Обработчик поиска фильмов по жанру и годам. Пагинация и валидация ввода.
+"""
 
-from db.mysql_connector import get_all_genres, search_by_genre_and_years, get_genre_year_ranges, count_by_genre_and_years, get_year_range
+from db.mysql_connector import (get_all_genres, search_by_genre_and_years,
+                                get_genre_year_ranges, count_by_genre_and_years, get_year_range)
 from utils.formatter import print_films
 from logger.log_writer import log_search
 
 
-# shows all genres with year ranges, asks user to pick one, then shows results 10 at a time
-# показывает жанры с диапазоном лет, пользователь выбирает, потом результаты по 10
 def handle_genre_search():
+    """Show available genres with year ranges, ask for genre + years, display results.
+    Показывает жанры с диапазоном лет, спрашивает выбор, выводит результаты.
+    """
     genres = get_all_genres()
     genre_years = get_genre_year_ranges()
 
-    # show all genres with their year range / выводим жанры с их диапазоном лет
+    # Display all genres with their available year range
+    # Выводим все жанры с их диапазоном лет
     print("\nAvailable genres:")
     for genre in genres:
         yr = genre_years.get(genre[0], ("?", "?"))
         print(f"  {genre[0]:>2}. {genre[1]:<15} | {yr[0]} - {yr[1]}")
     print("\n0 - Back to main menu")
 
-    # user can pick genre by number or name / можно выбрать жанр по номеру или названию
+    # User can pick genre by number or name
+    # Можно выбрать жанр по номеру или названию
     user_input = input("Enter genre number or name: ")
     if user_input == "0":
         return
 
     genre_id = None
     genre_name = None
-    # check if user entered a number / проверяем ввёл ли пользователь номер
     if user_input.isdigit():
         num = int(user_input)
         for genre in genres:
@@ -43,7 +48,8 @@ def handle_genre_search():
         print("Genre not found")
         return
 
-    # user can enter one year (2006) or range (2000-2010), 3 attempts / можно ввести год или диапазон, 3 попытки
+    # Parse year input - accepts single year (2006) or range (2000-2010), 3 attempts
+    # Ввод года или диапазона, 3 попытки
     min_year, max_year = genre_years.get(genre_id, get_year_range())
     year_from, year_to = None, None
     for attempt in range(3):
@@ -60,7 +66,8 @@ def handle_genre_search():
             print(f"Please enter a valid year! Attempts left: {2 - attempt}")
             year_from, year_to = None, None
             continue
-        # check that years make sense / проверяем что года в допустимом диапазоне
+        # Validate that years are within the available range
+        # Проверяем что года в допустимом диапазоне
         if year_from < min_year or year_to > max_year or year_from > year_to:
             print(f"Invalid range! Available years: {min_year} - {max_year}. Attempts left: {2 - attempt}")
             year_from, year_to = None, None
@@ -73,8 +80,10 @@ def handle_genre_search():
     query_label = f"{genre_name} {year_from}-{year_to}"
     total = count_by_genre_and_years(genre_id, year_from, year_to)
     print(f"\nFound {total} films for \"{genre_name}\" ({year_from}-{year_to})")
+    log_search("genre", {"genre": genre_name, "year_from": year_from, "year_to": year_to}, total, query_label)
 
-    # pagination - same as keyword search / пагинация - так же как в поиске по слову
+    # Pagination - same logic as keyword search
+    # Пагинация - такая же логика как в поиске по слову
     offset = 0
     while True:
         results = search_by_genre_and_years(genre_id, year_from, year_to, offset)
@@ -83,12 +92,16 @@ def handle_genre_search():
             break
         has_more = len(results) == 11
         results = results[:10]
-        log_search("genre", {"genre": genre_name, "year_from": year_from, "year_to": year_to}, len(results), query_label)
-        print_films(results)
+        print_films(results, start_num=offset + 1)
         if not has_more:
             print("No more results")
             break
-        if input("Show more? (y/n): ") == "y":
-            offset += 10
-        else:
-            break
+        while True:
+            choice = input("Show more? (y/n, 0 - menu): ").lower()
+            if choice == "y":
+                offset += 10
+                break
+            elif choice in ("n", "0"):
+                return
+            else:
+                print("Please enter y or n")
